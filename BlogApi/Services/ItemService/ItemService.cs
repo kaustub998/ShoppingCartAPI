@@ -59,7 +59,7 @@ namespace EcorpAPI.Services.ItemService
                     img.ImageBytes = await ReadLocalImageAsByteArray(img.ImagePath);
                 };
 
-                shoppingItem.ItemImages = detailedImages;
+                shoppingItem.ItemImageList = detailedImages;
             }
 
             return shoppingItems;
@@ -122,7 +122,7 @@ namespace EcorpAPI.Services.ItemService
             return data.FirstOrDefault() ?? new DetailedShoppingItem();
         }
 
-        public async Task<ResponseModel> AddItemAsync(AddEditShoppingItem shoppingItem)
+        public async Task<ResponseModel> AddItemAsync(DetailedShoppingItem shoppingItem)
         {
             ResponseModel response = new ResponseModel();
 
@@ -150,7 +150,7 @@ namespace EcorpAPI.Services.ItemService
 
                 if (shoppingItem.ItemImages != null)
                 {
-                    foreach (var image in shoppingItem.ItemImages)
+                    foreach (var image in shoppingItem.ItemImageList)
                     {
                         string imageName = $"{shoppingitem.ItemId}_image_{Guid.NewGuid()}.jpg";
                         string imagePath = Path.Combine(_imageFolderPath, imageName);
@@ -197,7 +197,7 @@ namespace EcorpAPI.Services.ItemService
             return response;
         }
 
-        public async Task<ResponseModel> EditItemAsync(AddEditShoppingItem shoppingItem)
+        public async Task<ResponseModel> EditItemAsync(DetailedShoppingItem shoppingItem)
         {
             ResponseModel response = new ResponseModel();
             var _imageFolderPath = _configuration["ImagePath"];
@@ -224,7 +224,7 @@ namespace EcorpAPI.Services.ItemService
                     foreach (var existingImage in existingImages.ToList())
                     {
                         // Check if the existing image is not present in the new images
-                        if (!shoppingItem.ItemImages.Any(newImage => newImage.ImageId == existingImage.ImageId))
+                        if (!shoppingItem.ItemImageList.Any(newImage => newImage.ImageId == existingImage.ImageId))
                         {
                             // Mark the image as deleted in the database
                             existingImage.IsDeleted = true;
@@ -233,7 +233,7 @@ namespace EcorpAPI.Services.ItemService
                     }
 
                     // Add new images to the database
-                    foreach (var newImage in shoppingItem.ItemImages)
+                    foreach (var newImage in shoppingItem.ItemImageList)
                     {
                         // Check if the new image is not present in the existing images
                         if (!existingImages.Any(existingImage => existingImage.ImageId == newImage.ImageId))

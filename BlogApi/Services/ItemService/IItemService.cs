@@ -6,8 +6,8 @@ namespace EcorpAPI.Services.ItemService
     {
         Task<List<DetailedShoppingItem>> GetItemList(bool isShopPage = true);
         Task<DetailedShoppingItem> GetItemDetail(int? id);
-        Task<ResponseModel> AddItemAsync(AddEditShoppingItem shoppingItem);
-        Task<ResponseModel> EditItemAsync(AddEditShoppingItem shoppingItem);
+        Task<ResponseModel> AddItemAsync(DetailedShoppingItem shoppingItem);
+        Task<ResponseModel> EditItemAsync(DetailedShoppingItem shoppingItem);
         Task<ResponseModel> DeleteItemAsync(int? shoppingItemId);
     }
 }

@@ -17,16 +17,10 @@ namespace EcorpAPI.Models
         public virtual ItemImage? ItemImages { get; set; }
     }
 
-    public class AddEditShoppingItem : ShoppingItem
-    {
-        public List<byte[]>? ImageBytesList { get; set; }
-        public List<ItemImageDetailed>? ItemImages { get; set; }
-    }
-
     public class DetailedShoppingItem : ShoppingItem
     {
         public string? User_FullName { get; set; }
-        public List<ItemImageDetailed>? ItemImages { get; set; }
+        public List<ItemImageDetailed>? ItemImageList { get; set; }
     }
 
     public class ItemImage : BaseModel

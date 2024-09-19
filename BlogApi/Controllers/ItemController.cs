@@ -41,14 +41,14 @@ namespace EcorpAPI.Controllers
 
         [Route("AddItem")]
         [HttpPost,Authorize]
-        public async Task<IActionResult> AddItemAsync(AddEditShoppingItem item)
+        public async Task<IActionResult> AddItemAsync(DetailedShoppingItem item)
         {
             return Ok(await _itemService.AddItemAsync(item));
         }
 
         [Route("EditItem")]
         [HttpPost,Authorize]
-        public async Task<IActionResult> EditItemAsync(AddEditShoppingItem item)
+        public async Task<IActionResult> EditItemAsync(DetailedShoppingItem item)
         {
             return Ok(await _itemService.EditItemAsync(item));
         }
