@@ -15,6 +15,7 @@ namespace EcorpAPI.Models
         public bool IsDeleted { get; set; }
         public virtual UserDetails? UserDetails { get; set; }
         public virtual ItemImage? ItemImages { get; set; }
+        public virtual ICollection<CartItemModel>? CartItems { get; set; }
     }
 
     public class DetailedShoppingItem : ShoppingItem

@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using EcorpAPI.Services.AccountService;
 using EcorpAPI.Services.RegisterLoginService;
 using EcorpAPI.Services.ItemService;
+using EcorpAPI.Services.CartService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRegisterLoginService, RegisterLoginService>();
 
