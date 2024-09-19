@@ -20,7 +20,7 @@ namespace EcorpAPI.Services.ItemService
         private async Task<List<DetailedShoppingItem>> GetDetailedItemData(bool isAdmin = false, int itemId = 0)
         {
             var data = (from shoppingItem in _shoppingCartContext.ShoppingItems
-                        join user in _shoppingCartContext.UserDetail on shoppingItem.UserId equals user.UserId
+                        join user in _shoppingCartContext.UserDetails on shoppingItem.UserId equals user.UserId
                         where shoppingItem.IsDeleted != true
                         && (shoppingItem.UserId == CommonService.GetUserId(_httpContextAccessor.HttpContext) && isAdmin != true || isAdmin)
                         && (itemId > 0 && shoppingItem.ItemId == itemId || itemId == 0)
@@ -104,7 +104,7 @@ namespace EcorpAPI.Services.ItemService
             bool isAdmin = false;
             try
             {
-                isAdmin = await _shoppingCartContext.UserDetail.Where(item => item.UserId == CommonService.GetUserId(_httpContextAccessor.HttpContext)).Select(item => item.IsAdmin).FirstOrDefaultAsync();
+                isAdmin = await _shoppingCartContext.UserDetails.Where(item => item.UserId == CommonService.GetUserId(_httpContextAccessor.HttpContext)).Select(item => item.IsAdmin).FirstOrDefaultAsync();
             }
             catch (Exception ex) { }
 

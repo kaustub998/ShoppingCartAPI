@@ -11,7 +11,7 @@ namespace EcorpAPI.Models
         {
         }
         public virtual DbSet<ShoppingItem> ShoppingItems { get; set; }
-        public virtual DbSet<UserDetails> UserDetail { get; set; }
+        public virtual DbSet<UserDetails> UserDetails { get; set; }
         public virtual DbSet<ItemImage> ItemImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

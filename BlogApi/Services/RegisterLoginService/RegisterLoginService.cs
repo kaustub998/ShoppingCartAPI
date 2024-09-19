@@ -26,7 +26,7 @@ namespace EcorpAPI.Services.RegisterLoginService
 
         public async Task<ResponseModel> UserRegistration(UserDetails RegistrationData)
         {
-            var EmailCollision = await _shoppingCartContext.UserDetail.Where(item => item.Email.ToLower() == RegistrationData.Email.ToLower() && item.IsDeleted != true).FirstOrDefaultAsync();
+            var EmailCollision = await _shoppingCartContext.UserDetails.Where(item => item.Email.ToLower() == RegistrationData.Email.ToLower() && item.IsDeleted != true).FirstOrDefaultAsync();
             var response = new ResponseModel();
 
             try
@@ -49,7 +49,7 @@ namespace EcorpAPI.Services.RegisterLoginService
 
                     User.Password = CreatePasswordHash(RegistrationData.Password, User.SaltKey);
 
-                    _shoppingCartContext.UserDetail.Add(User);
+                    _shoppingCartContext.UserDetails.Add(User);
                     await _shoppingCartContext.SaveChangesAsync();
 
                     response.isSuccess = true;
@@ -76,7 +76,7 @@ namespace EcorpAPI.Services.RegisterLoginService
         public async Task<SessionDetails> UserLogin(LoginDetail LoginData)
         {
             SessionDetails sd = new SessionDetails();
-            var user = await _shoppingCartContext.UserDetail.Where(x => x.Email.ToLower() == LoginData.Email.ToLower().Trim() && x.IsDeleted != true).FirstOrDefaultAsync();
+            var user = await _shoppingCartContext.UserDetails.Where(x => x.Email.ToLower() == LoginData.Email.ToLower().Trim() && x.IsDeleted != true).FirstOrDefaultAsync();
             if (user != null)
             {
                 if (user.Password == CreatePasswordHash(LoginData.Password, user.SaltKey))
@@ -149,11 +149,11 @@ namespace EcorpAPI.Services.RegisterLoginService
             var url = _config.GetValue<string>("UIBaseUrl") + "/account/resetpassword";
             var emailBody = $"To reset your password, click the following link: {url}?token={resetToken}";
 
-            var user = await _shoppingCartContext.UserDetail.Where(item => item.Email.ToLower() == userDetail.Email.ToLower() && item.IsDeleted != true).FirstOrDefaultAsync();
+            var user = await _shoppingCartContext.UserDetails.Where(item => item.Email.ToLower() == userDetail.Email.ToLower() && item.IsDeleted != true).FirstOrDefaultAsync();
             if (user != null)
             {
                 user.ResetToken = resetToken;
-                _shoppingCartContext.UserDetail.Update(user);
+                _shoppingCartContext.UserDetails.Update(user);
                 await SendEmailAsync(userDetail.Email, "Password Reset Request", emailBody);
 
                 response.isError = false;
@@ -174,7 +174,7 @@ namespace EcorpAPI.Services.RegisterLoginService
         public async Task<ResponseModel> ResetPasswordAsync(AdminResetPasswordModel adminResetPasswordModel)
         {
             ResponseModel retval = new ResponseModel();
-            UserDetails? user = await _shoppingCartContext.UserDetail.Where(x => x.ResetToken == adminResetPasswordModel.ResetToken).FirstOrDefaultAsync();
+            UserDetails? user = await _shoppingCartContext.UserDetails.Where(x => x.ResetToken == adminResetPasswordModel.ResetToken).FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -182,7 +182,7 @@ namespace EcorpAPI.Services.RegisterLoginService
                 user.ModifiedBy = user.UserId;
                 user.ModifiedOn = DateTime.UtcNow;
 
-                _shoppingCartContext.UserDetail.Update(user);
+                _shoppingCartContext.UserDetails.Update(user);
                 await _shoppingCartContext.SaveChangesAsync();
 
                 retval.errorMessage = "";
@@ -235,7 +235,7 @@ namespace EcorpAPI.Services.RegisterLoginService
 
         public async Task<ResponseModel> ChangePassword(ChangePassword userDetail)
         {
-            UserDetails? user = await _shoppingCartContext.UserDetail.Where(x => x.UserId == userDetail.UserId && x.IsDeleted != true).FirstOrDefaultAsync();
+            UserDetails? user = await _shoppingCartContext.UserDetails.Where(x => x.UserId == userDetail.UserId && x.IsDeleted != true).FirstOrDefaultAsync();
             if (user != null)
             {
                 string currentPasswordHash = CreatePasswordHash(userDetail.CurrentPassword, user.SaltKey);
@@ -251,7 +251,7 @@ namespace EcorpAPI.Services.RegisterLoginService
                 user.Password = CreatePasswordHash(userDetail.Password, user.SaltKey);
                 user.ModifiedBy = CommonService.GetUserId(_httpContextAccessor.HttpContext);
                 user.ModifiedOn = DateTime.UtcNow;
-                _shoppingCartContext.UserDetail.Update(user);
+                _shoppingCartContext.UserDetails.Update(user);
             }
             await _shoppingCartContext.SaveChangesAsync();
 
