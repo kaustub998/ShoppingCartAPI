@@ -179,7 +179,10 @@ namespace EcorpAPI.Services.CartService
                 foreach(var item in items)
                 {
                     if(item.ItemQuantity >= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity)
+                    {
                         item.ItemQuantity -= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity;
+                        _shoppingCartContext.ShoppingItems.Update(item);
+                    }
                     else
                     {
                         response.isSuccess = false;
