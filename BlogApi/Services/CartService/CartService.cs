@@ -176,9 +176,9 @@ namespace EcorpAPI.Services.CartService
             {
                 var transactionId = (new Guid()).ToString();
 
-                foreach(var item in items)
+                foreach (var item in items)
                 {
-                    if(item.ItemQuantity >= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity)
+                    if (item.ItemQuantity >= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity)
                     {
                         item.ItemQuantity -= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity;
                         _shoppingCartContext.ShoppingItems.Update(item);
@@ -214,5 +214,35 @@ namespace EcorpAPI.Services.CartService
             }
 
         }
+
+        public async Task<List<DetailedConfirmedOrder>> GetSoldItemsDetail()
+        {
+            var userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
+
+            var soldOrders = await _shoppingCartContext.ConfirmedOrders.Where(item => item.Item.UserId == userId)
+                .Select(item => new DetailedConfirmedOrder
+                {
+                    BuyerId = item.BuyerId,
+                    BuyerName = item.Buyer.FirstName + " " + item.Buyer.LastName,
+                    ItemName = item.Item.ItemName,
+                    ItemId = item.ItemId,
+                    Rate = item.Rate,
+                    Quantity = item.Quantity,
+                }).ToListAsync();
+
+            soldOrders = soldOrders.GroupBy(item => new { item.ItemId, item.BuyerId, item.Rate }).Select(item => new DetailedConfirmedOrder
+            {
+                BuyerId = item.Key.BuyerId,
+                BuyerName = item.FirstOrDefault()?.BuyerName,
+                ItemName = item.FirstOrDefault()?.ItemName,
+                ItemId = item.Key.ItemId,
+                Rate = item.Key.Rate,
+                Quantity = item.Sum(x => x.Quantity),
+                Total = item.Key.Rate * item.Sum(x => x.Quantity)
+            }).ToList();
+
+            return soldOrders;
+        }
+
     }
 }
