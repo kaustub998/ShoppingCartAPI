@@ -119,8 +119,9 @@ namespace EcorpAPI.Services.CartService
         }
 
 
-        public async Task<bool> RemoveFromCartAsync(int? userId, int? cartItemId)
+        public async Task<ResponseModel> RemoveFromCartAsync(int? userId, int? cartItemId)
         {
+            var responseModel = new ResponseModel();
             userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
             try
             {
@@ -128,7 +129,11 @@ namespace EcorpAPI.Services.CartService
                     .FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId && ci.UserId == userId);
 
                 if (cartItem == null)
-                    return false;
+                {
+                    responseModel.isSuccess = false;
+                    return responseModel;
+                }
+                    
 
                 var item = await _shoppingCartContext.ShoppingItems.FindAsync(cartItem.ItemId);
                 if (item != null)
@@ -138,11 +143,13 @@ namespace EcorpAPI.Services.CartService
 
                 _shoppingCartContext.CartItems.Remove(cartItem);
                 await _shoppingCartContext.SaveChangesAsync();
-                return true;
+                responseModel.isSuccess = true;
+                return responseModel;
             }
             catch (Exception ex)
             {
-                return false;
+                responseModel.isSuccess = false;
+                return responseModel;
             }
         }
 
@@ -263,6 +270,7 @@ namespace EcorpAPI.Services.CartService
                     });
                 }
 
+                _shoppingCartContext.CartItems.UpdateRange(userCartItems);
                 await _shoppingCartContext.SaveChangesAsync();
 
                 response.isSuccess = true;
