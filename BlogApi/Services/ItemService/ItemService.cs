@@ -60,40 +60,6 @@ namespace EcorpAPI.Services.ItemService
 
             return shoppingItems;
         }
-        private async Task<byte[]> ReadLocalImageAsByteArray(string imagePath)
-        {
-            try
-            {
-
-                byte[] imageData = await File.ReadAllBytesAsync(imagePath);
-                return imageData;
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions that occur during reading
-                Console.WriteLine($"Error reading image file: {ex.Message}");
-                return null;
-            }
-        }
-        private async Task<string[]> SaveImagesAsync(int itemId, List<byte[]> images)
-        {
-            var _imageFolderPath = _configuration["ImagePath"];
-            List<string> imageUrls = new List<string>();
-
-            // Create a directory for the shoppingitem if it doesn't exist
-            string itemFolderPath = Path.Combine(_imageFolderPath, $"item{itemId}");
-            Directory.CreateDirectory(itemFolderPath);
-
-            // Save each image
-            for (int i = 0; i < images.Count; i++)
-            {
-                string imagePath = Path.Combine(itemFolderPath, $"{itemId}_image_{i}.jpg");
-                await File.WriteAllBytesAsync(imagePath, images[i]);
-                imageUrls.Add(imagePath);
-            }
-
-            return imageUrls.ToArray();
-        }
 
         public async Task<List<DetailedShoppingItem>> GetItemList(bool isShopPage = true)
         {

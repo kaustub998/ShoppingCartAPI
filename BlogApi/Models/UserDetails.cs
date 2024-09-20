@@ -16,6 +16,7 @@
         public string? Password { get; set; }
         public string? ResetToken { get; set; }
         public byte[]? Image { get; set; }
+        public virtual ICollection<ConfirmedOrder>? ConfirmedOrders { get; set; }
     }
 
     public class LoginDetail

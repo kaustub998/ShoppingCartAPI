@@ -212,7 +212,95 @@ namespace EcorpAPI.Services.CartService
             return total ?? 0;
         }
 
+        public async Task<ResponseModel> CheckOutCart()
+        {
+            var response = new ResponseModel();
 
+            var userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
+            var userCartItems = await _shoppingCartContext.CartItems.Where(item => item.UserId == userId).ToListAsync();
+
+            var items = await _shoppingCartContext.ShoppingItems.Where(item => userCartItems.Select(x => x.ItemId).ToList().Contains(item.ItemId)).ToListAsync();
+
+            var itemsExceedingStock = items.Where(item => userCartItems.Any(cartItem => cartItem.ItemId == item.ItemId && cartItem.Quantity > item.ItemQuantity)).ToList();
+
+            if (itemsExceedingStock.Count() > 0)
+            {
+                response.isSuccess = false;
+                response.isError = true;
+                response.message = "Items in the cart exceed the total quantity.";
+                return response;
+            }
+            else
+            {
+                var transactionId = (new Guid()).ToString();
+
+                foreach (var item in items)
+                {
+                    if (item.ItemQuantity >= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity)
+                    {
+                        item.ItemQuantity -= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity;
+                        _shoppingCartContext.ShoppingItems.Update(item);
+                    }
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.isError = true;
+                        response.message = "Items in the cart exceed the total quantity.";
+                        return response;
+                    }
+                }
+
+                foreach (var cartItem in userCartItems)
+                {
+                    _shoppingCartContext.ConfirmedOrders.Add(new ConfirmedOrder
+                    {
+                        BuyerId = userId,
+                        ItemId = cartItem.ItemId,
+                        Quantity = cartItem.Quantity,
+                        Rate = items.Where(x => x.ItemId == cartItem.ItemId).Select(x => x.ItemRate).FirstOrDefault(),
+                        BoughtDate = DateTime.UtcNow,
+                        TransactionId = transactionId,
+                    });
+                }
+
+                await _shoppingCartContext.SaveChangesAsync();
+
+                response.isSuccess = true;
+                response.isError = false;
+                response.message = "Items Bought.";
+                return response;
+            }
+
+        }
+
+        public async Task<List<DetailedConfirmedOrder>> GetSoldItemsDetail()
+        {
+            var userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
+
+            var soldOrders = await _shoppingCartContext.ConfirmedOrders.Where(item => item.Item.UserId == userId)
+                .Select(item => new DetailedConfirmedOrder
+                {
+                    BuyerId = item.BuyerId,
+                    BuyerName = item.Buyer.FirstName + " " + item.Buyer.LastName,
+                    ItemName = item.Item.ItemName,
+                    ItemId = item.ItemId,
+                    Rate = item.Rate,
+                    Quantity = item.Quantity,
+                }).ToListAsync();
+
+            soldOrders = soldOrders.GroupBy(item => new { item.ItemId, item.BuyerId, item.Rate }).Select(item => new DetailedConfirmedOrder
+            {
+                BuyerId = item.Key.BuyerId,
+                BuyerName = item.FirstOrDefault()?.BuyerName,
+                ItemName = item.FirstOrDefault()?.ItemName,
+                ItemId = item.Key.ItemId,
+                Rate = item.Key.Rate,
+                Quantity = item.Sum(x => x.Quantity),
+                Total = item.Key.Rate * item.Sum(x => x.Quantity)
+            }).ToList();
+
+            return soldOrders;
+        }
 
     }
 }
