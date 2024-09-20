@@ -1,5 +1,6 @@
 ﻿using EcorpAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EcorpAPI.Services.CartService
 {
@@ -18,10 +19,20 @@ namespace EcorpAPI.Services.CartService
 
         public async Task<List<CartItemModel>> GetCartItemsAsync(int? userId)
         {
-            return await _shoppingCartContext.CartItems
-                .Where(ci => ci.UserId == userId)            
-                .Include(ci => ci.Item)                    
-                .ToListAsync();                       
+            userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
+            try
+            {
+                var data = await _shoppingCartContext.CartItems
+                    .Where(ci => ci.UserId == userId)
+                    .Include(ci => ci.Item)
+                    .ToListAsync();
+                return data;
+
+            }
+            catch (Exception ex)
+            {
+                return new List<CartItemModel>();
+            }
         }
         public async Task<ResponseModel> AddToCartAsync(CartItemModel? cartItemModel)
         {
@@ -87,24 +98,26 @@ namespace EcorpAPI.Services.CartService
 
         public async Task<bool> RemoveFromCartAsync(int? userId, int? cartItemId)
         {
+            userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
             var cartItem = await _shoppingCartContext.CartItems
-                .FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId && ci.UserId == userId); 
+                .FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId && ci.UserId == userId);
 
-            if (cartItem == null)  
+            if (cartItem == null)
                 return false;
 
-            var item = await _shoppingCartContext.ShoppingItems.FindAsync(cartItem.ItemId);  
+            var item = await _shoppingCartContext.ShoppingItems.FindAsync(cartItem.ItemId);
             if (item != null)
             {
                 item.ItemQuantity += cartItem.Quantity;  // Restore the stock quantity of the item
             }
 
-            _shoppingCartContext.CartItems.Remove(cartItem); 
-            return await _shoppingCartContext.SaveChangesAsync() > 0;  
+            _shoppingCartContext.CartItems.Remove(cartItem);
+            return await _shoppingCartContext.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> UpdateQuantityAsync(CartItemModel? cartItemModel)
         {
+            cartItemModel.UserId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
             var cartItem = await _shoppingCartContext.CartItems
                 .FirstOrDefaultAsync(ci => ci.CartItemId == cartItemModel.CartItemId && ci.UserId == cartItemModel.UserId);
 
@@ -131,12 +144,13 @@ namespace EcorpAPI.Services.CartService
 
         public async Task<decimal> GetCartTotalAsync(int? userId)
         {
+            userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
             var total = await _shoppingCartContext.CartItems
                 .Where(ci => ci.UserId == userId)
                 .Include(ci => ci.Item)
                 .SumAsync(ci => (decimal?)ci.Item.ItemRate * ci.Quantity);
 
-            return total ?? 0; 
+            return total ?? 0;
         }
 
 
