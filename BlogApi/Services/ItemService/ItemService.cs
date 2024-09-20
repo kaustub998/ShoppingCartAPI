@@ -36,8 +36,9 @@ namespace EcorpAPI.Services.ItemService
 
             return data;
         }
+        
 
-        private async Task<List<DetailedShoppingItem>> GetItemImage(List<DetailedShoppingItem> shoppingItems)
+        public async Task<List<DetailedShoppingItem>> GetItemImage(List<DetailedShoppingItem> shoppingItems)
         {
             var shoppingItemIds = shoppingItems.Select(itemm => itemm.ItemId).ToList();
 

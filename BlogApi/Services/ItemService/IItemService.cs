@@ -9,5 +9,6 @@ namespace EcorpAPI.Services.ItemService
         Task<ResponseModel> AddItemAsync(DetailedShoppingItem shoppingItem);
         Task<ResponseModel> EditItemAsync(DetailedShoppingItem shoppingItem);
         Task<ResponseModel> DeleteItemAsync(int? shoppingItemId);
+        Task<List<DetailedShoppingItem>> GetItemImage(List<DetailedShoppingItem> shoppingItems);
     }
 }

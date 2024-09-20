@@ -1,4 +1,6 @@
-﻿namespace EcorpAPI.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EcorpAPI.Models
 {
     public class CartItemModel
     {
@@ -9,6 +11,14 @@
         public virtual ShoppingItem? Item { get; set; }
 
     }
-    
+    public class CartItemDetails: CartItemModel
+    {
+        public string? ItemName { get; set; }
+        public string? ItemDescription { get; set; }
+        public decimal ItemRate { get; set; }
+        public List<ItemImage>? ItemImageList { get; set; }
+
+    }
+
 
 }
