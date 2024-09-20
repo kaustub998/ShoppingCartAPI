@@ -54,7 +54,12 @@ namespace EcorpAPI.Controllers
             return Ok(await _cartService.GetCartTotalAsync(userId));
         }
 
-
+        [Route("CheckoutCart")]
+        [HttpGet]
+        public async Task<IActionResult> CheckoutCart()
+        {
+            return Ok(await _cartService.CheckOutCart());
+        }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using EcorpAPI.Models;
+﻿using Azure;
+using EcorpAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -153,7 +154,62 @@ namespace EcorpAPI.Services.CartService
             return total ?? 0;
         }
 
+        public async Task<ResponseModel> CheckOutCart()
+        {
+            var response = new ResponseModel();
 
+            var userId = CommonService.GetUserId(_httpContextAccessor.HttpContext);
+            var userCartItems = await _shoppingCartContext.CartItems.Where(item => item.UserId == userId).ToListAsync();
 
+            var items = await _shoppingCartContext.ShoppingItems.Where(item => userCartItems.Select(x => x.ItemId).ToList().Contains(item.ItemId)).ToListAsync();
+
+            var itemsExceedingStock = items.Where(item => userCartItems.Any(cartItem => cartItem.ItemId == item.ItemId && cartItem.Quantity > item.ItemQuantity)).ToList();
+
+            if (itemsExceedingStock.Count() > 0)
+            {
+                response.isSuccess = false;
+                response.isError = true;
+                response.message = "Items in the cart exceed the total quantity.";
+                return response;
+            }
+            else
+            {
+                var transactionId = (new Guid()).ToString();
+
+                foreach(var item in items)
+                {
+                    if(item.ItemQuantity >= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity)
+                        item.ItemQuantity -= userCartItems.Where(x => x.ItemId == item.ItemId).FirstOrDefault()?.Quantity;
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.isError = true;
+                        response.message = "Items in the cart exceed the total quantity.";
+                        return response;
+                    }
+                }
+
+                foreach (var cartItem in userCartItems)
+                {
+                    _shoppingCartContext.ConfirmedOrders.Add(new ConfirmedOrder
+                    {
+                        BuyerId = userId,
+                        ItemId = cartItem.ItemId,
+                        Quantity = cartItem.Quantity,
+                        Rate = items.Where(x => x.ItemId == cartItem.ItemId).Select(x => x.ItemRate).FirstOrDefault(),
+                        BoughtDate = DateTime.UtcNow,
+                        TransactionId = transactionId,
+                    });
+                }
+
+                await _shoppingCartContext.SaveChangesAsync();
+
+                response.isSuccess = true;
+                response.isError = false;
+                response.message = "Items Bought.";
+                return response;
+            }
+
+        }
     }
 }

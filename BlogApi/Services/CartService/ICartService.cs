@@ -9,6 +9,6 @@ namespace EcorpAPI.Services.CartService
         Task<bool> UpdateQuantityAsync(CartItemModel? cartItemMode);
         Task<bool> RemoveFromCartAsync(int? userId, int? cartItemId);
         Task<decimal> GetCartTotalAsync(int? userId);
-
+        Task<ResponseModel> CheckOutCart();
     }
 }

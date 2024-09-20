@@ -14,6 +14,7 @@ namespace EcorpAPI.Models
         public decimal ItemRate { get; set; }
         public bool IsDeleted { get; set; }
         public virtual ICollection<CartItemModel>? CartItems { get; set; }
+        public virtual ICollection<ConfirmedOrder>? ConfirmedOrders { get; set; }
     }
 
     public class DetailedShoppingItem : ShoppingItem
