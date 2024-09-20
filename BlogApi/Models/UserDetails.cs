@@ -15,6 +15,7 @@
         public Guid SaltKey { get; set; }
         public string? Password { get; set; }
         public string? ResetToken { get; set; }
+        public byte[]? Image { get; set; }
     }
 
     public class LoginDetail

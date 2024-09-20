@@ -42,6 +42,7 @@ namespace EcorpAPI.Services.RegisterLoginService
                         IsAdmin = RegistrationData.IsAdmin,
                         DateOfBirth = RegistrationData.DateOfBirth,
                         ContactNumber = RegistrationData.ContactNumber,
+                        Image = RegistrationData.Image,
                         SaltKey = Guid.NewGuid(),
                         CreatedBy = CommonService.GetUserId(_httpContextAccessor.HttpContext),
                         CreatedOn = DateTime.UtcNow

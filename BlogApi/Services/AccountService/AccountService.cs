@@ -42,6 +42,7 @@ namespace EcorpAPI.Services.AccountService
                     User.Email = user.Email;
                     User.DateOfBirth = user.DateOfBirth;
                     User.Gender = user.Gender;
+                    User.Image = user.Image;
                     User.ModifiedBy = CommonService.GetUserId(_httpContextAccessor.HttpContext);
                     User.ModifiedOn = DateTime.Now;
 

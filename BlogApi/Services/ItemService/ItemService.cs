@@ -47,17 +47,12 @@ namespace EcorpAPI.Services.ItemService
 
             foreach (var shoppingItem in shoppingItems)
             {
-                List<ItemImageDetailed> detailedImages = images.Select(img => new ItemImageDetailed
+                List<ItemImage> detailedImages = images.Select(img => new ItemImage
                 {
                     ImageId = img.ImageId,
                     ItemId = img.ItemId,
-                    ImagePath = img.ImagePath,
+                    Image = img.Image,
                 }).ToList();
-
-                foreach (var img in detailedImages)
-                {
-                    img.ImageBytes = await ReadLocalImageAsByteArray(img.ImagePath);
-                };
 
                 shoppingItem.ItemImageList = detailedImages;
             }
@@ -144,34 +139,13 @@ namespace EcorpAPI.Services.ItemService
                 response.isSuccess = true;
                 response.message = "Item Added Successfully!!!";
 
-                List<string> imageUrls = new List<string>();
-
-                var _imageFolderPath = _configuration["ImagePath"];
-
-                if (shoppingItem.ItemImages != null)
+                if (shoppingItem.ItemImageList != null && shoppingItem.ItemImageList.Count() > 0)
                 {
-                    foreach (var image in shoppingItem.ItemImageList)
-                    {
-                        string imageName = $"{shoppingitem.ItemId}_image_{Guid.NewGuid()}.jpg";
-                        string imagePath = Path.Combine(_imageFolderPath, imageName);
-
-                        try
-                        {
-                            await File.WriteAllBytesAsync(imagePath, image.ImageBytes);
-                            imageUrls.Add(imagePath);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Handle or log the exception
-                            Console.WriteLine($"Error saving image: {ex.Message}");
-                        }
-                    }
-
                     // Create Image entities for database insertion
-                    List<ItemImage> itemImages = imageUrls.Select(url => new ItemImage
+                    List<ItemImage> itemImages = shoppingItem.ItemImageList.Select(url => new ItemImage
                     {
                         ItemId = shoppingitem.ItemId,
-                        ImagePath = url
+                        Image = url.Image
                     }).ToList();
 
                     try
@@ -221,35 +195,26 @@ namespace EcorpAPI.Services.ItemService
                     response.message = "Item Edited Successfully!!!";
 
                     List<ItemImage> existingImages = await _shoppingCartContext.ItemImages.Where(item => item.IsDeleted != true && item.ItemId == shoppingItem.ItemId).ToListAsync();
-                    foreach (var existingImage in existingImages.ToList())
+                    List<ItemImage> newImages = shoppingItem.ItemImageList?.ToList() ?? new List<ItemImage>();
+
+                    var deletedImages = existingImages.Except(newImages);
+                    var addedImages = newImages.Except(existingImages);
+
+                    foreach (var image in deletedImages)
                     {
-                        // Check if the existing image is not present in the new images
-                        if (!shoppingItem.ItemImageList.Any(newImage => newImage.ImageId == existingImage.ImageId))
-                        {
-                            // Mark the image as deleted in the database
-                            existingImage.IsDeleted = true;
-                            _shoppingCartContext.ItemImages.Update(existingImage);
-                        }
+                        image.IsDeleted = true;
                     }
 
                     // Add new images to the database
-                    foreach (var newImage in shoppingItem.ItemImageList)
+                    foreach (var newImage in addedImages)
                     {
-                        // Check if the new image is not present in the existing images
-                        if (!existingImages.Any(existingImage => existingImage.ImageId == newImage.ImageId))
+                        _shoppingCartContext.ItemImages.Add(new ItemImage
                         {
-                            string imageName = $"{shoppingItem.ItemId}_image_{Guid.NewGuid()}.jpg";
-                            string imagePath = Path.Combine(_imageFolderPath, imageName);
-                            await File.WriteAllBytesAsync(imagePath, newImage.ImageBytes);
-
-                            // Add the new image to the database
-                            _shoppingCartContext.ItemImages.Add(new ItemImage
-                            {
-                                ItemId = shoppingItem.ItemId,
-                                ImagePath = imagePath,
-                            });
-                        }
+                            ItemId = editItem.ItemId,
+                            Image = newImage.Image
+                        });
                     }
+
                     await _shoppingCartContext.SaveChangesAsync();
                 }
                 else

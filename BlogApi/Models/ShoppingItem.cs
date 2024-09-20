@@ -13,27 +13,20 @@ namespace EcorpAPI.Models
         [Precision(10, 2)]
         public decimal ItemRate { get; set; }
         public bool IsDeleted { get; set; }
-        public virtual UserDetails? UserDetails { get; set; }
-        public virtual ItemImage? ItemImages { get; set; }
         public virtual ICollection<CartItemModel>? CartItems { get; set; }
     }
 
     public class DetailedShoppingItem : ShoppingItem
     {
         public string? User_FullName { get; set; }
-        public List<ItemImageDetailed>? ItemImageList { get; set; }
+        public List<ItemImage>? ItemImageList { get; set; }
     }
 
     public class ItemImage : BaseModel
     {
         public int ImageId { get; set; }
         public int? ItemId { get; set; }
-        public string? ImagePath { get; set; }
+        public byte[]? Image { get; set; }
         public bool IsDeleted { get; set; }
-    }
-
-    public class ItemImageDetailed : ItemImage
-    {
-        public byte[]? ImageBytes { get; set; }
     }
 }
