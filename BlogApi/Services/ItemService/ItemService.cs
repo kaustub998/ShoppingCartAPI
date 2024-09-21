@@ -50,7 +50,7 @@ namespace EcorpAPI.Services.ItemService
 
             foreach (var shoppingItem in shoppingItems)
             {
-                List<ItemImage> detailedImages = images.Select(img => new ItemImage
+                List<ItemImage> detailedImages = images.Where(item => item.ItemId == shoppingItem.ItemId).Select(img => new ItemImage
                 {
                     ImageId = img.ImageId,
                     ItemId = img.ItemId,
@@ -177,6 +177,7 @@ namespace EcorpAPI.Services.ItemService
                     {
                         image.IsDeleted = true;
                     }
+                    _shoppingCartContext.ItemImages.UpdateRange(deletedImages);
 
                     // Add new images to the database
                     foreach (var newImage in addedImages)
