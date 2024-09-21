@@ -29,6 +29,8 @@ namespace EcorpAPI.Services.ItemService
                             ItemId = shoppingItem.ItemId,
                             ItemName = shoppingItem.ItemName,
                             ItemDescription = shoppingItem.ItemDescription,
+                            ItemQuantity= shoppingItem.ItemQuantity,   
+                            ItemRate= shoppingItem.ItemRate,
                             CreatedOn = shoppingItem.CreatedOn,
                             User_FullName = user.FirstName + " " + user.LastName,
                             UserId = shoppingItem.UserId,
@@ -88,18 +90,20 @@ namespace EcorpAPI.Services.ItemService
         {
             ResponseModel response = new ResponseModel();
 
-            ShoppingItem shoppingitem = new ShoppingItem
+            ShoppingItem shoppingItemData = new ShoppingItem
             {
                 UserId = shoppingItem.UserId,
                 ItemName = shoppingItem.ItemName?.Trim(),
                 ItemDescription = shoppingItem.ItemDescription?.Trim(),
+                ItemQuantity= shoppingItem.ItemQuantity,
+                ItemRate= shoppingItem.ItemRate,
                 CreatedOn = DateTime.Now,
                 CreatedBy = CommonService.GetUserId(_httpContextAccessor.HttpContext),
             };
 
             try
             {
-                _shoppingCartContext.ShoppingItems.Add(shoppingitem);
+                _shoppingCartContext.ShoppingItems.Add(shoppingItemData);
                 await _shoppingCartContext.SaveChangesAsync();
 
                 response.isError = false;
@@ -111,7 +115,7 @@ namespace EcorpAPI.Services.ItemService
                     // Create Image entities for database insertion
                     List<ItemImage> itemImages = shoppingItem.ItemImageList.Select(url => new ItemImage
                     {
-                        ItemId = shoppingitem.ItemId,
+                        ItemId = shoppingItemData.ItemId,
                         Image = url.Image
                     }).ToList();
 
@@ -151,6 +155,8 @@ namespace EcorpAPI.Services.ItemService
                 {
                     editItem.ItemName = shoppingItem.ItemName;
                     editItem.ItemDescription = shoppingItem.ItemDescription;
+                    editItem.ItemQuantity = shoppingItem.ItemQuantity;
+                    editItem.ItemRate = shoppingItem.ItemRate;
                     editItem.ModifiedOn = DateTime.Now;
                     editItem.ModifiedBy = CommonService.GetUserId(_httpContextAccessor.HttpContext);
 

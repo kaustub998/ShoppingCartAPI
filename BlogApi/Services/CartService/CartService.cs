@@ -99,9 +99,6 @@ namespace EcorpAPI.Services.CartService
                 existingCartItem.Quantity += cartItemModel.Quantity;
             }
 
-            // Reduce the stock quantity of the item
-            item.ItemQuantity -= cartItemModel.Quantity;
-
             // Save changes and set response based on success
             var changes = await _shoppingCartContext.SaveChangesAsync();
             if (changes > 0)
@@ -270,7 +267,7 @@ namespace EcorpAPI.Services.CartService
                     });
                 }
 
-                _shoppingCartContext.CartItems.UpdateRange(userCartItems);
+                _shoppingCartContext.CartItems.RemoveRange(userCartItems);
                 await _shoppingCartContext.SaveChangesAsync();
 
                 response.isSuccess = true;
