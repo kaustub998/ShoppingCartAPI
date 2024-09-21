@@ -21,5 +21,6 @@ namespace EcorpAPI.Models
         public decimal? Total { get; set; }
         public string? BuyerName { get; set; }
         public string? ItemName { get; set; }
+        public List<ItemImage>? ItemImageList { get; set; }
     }
 }

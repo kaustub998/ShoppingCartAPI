@@ -304,6 +304,17 @@ namespace EcorpAPI.Services.CartService
                 Total = item.Key.Rate * item.Sum(x => x.Quantity)
             }).ToList();
 
+            var newData = soldOrders.Select(x => new DetailedShoppingItem
+            {
+                ItemId = x.ItemId ?? 0,
+            }).ToList();
+            var ImageData = await _itemService.GetItemImage(newData);
+
+            foreach (var cart in soldOrders)
+            {
+                cart.ItemImageList = ImageData?.Where(x => x.ItemId == cart.ItemId).FirstOrDefault()?.ItemImageList;
+            }
+
             return soldOrders;
         }
 
